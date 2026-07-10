@@ -1,0 +1,60 @@
+@model Tproject.Domain.Entities.Project
+@{
+    ViewData["Title"] = Model.Name;
+}
+
+<nav aria-label="breadcrumb" class="mb-3">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a asp-controller="Projects" asp-action="Index">Projects</a></li>
+        <li class="breadcrumb-item active">@Model.Name</li>
+    </ol>
+</nav>
+
+<div class="page-header d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1>@Model.Name</h1>
+        @if (!string.IsNullOrWhiteSpace(Model.Description))
+        {
+            <p class="text-muted mb-0">@Model.Description</p>
+        }
+    </div>
+</div>
+
+<div class="card mb-4">
+    <div class="card-body">
+        <h5 class="card-title">Create Board</h5>
+        <form asp-controller="Boards" asp-action="Create" method="post" class="row g-2 align-items-end">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="ProjectId" value="@Model.Id" />
+            <div class="col-md-8">
+                <label class="form-label" for="BoardName">Board Name</label>
+                <input type="text" class="form-control" id="BoardName" name="Name" required maxlength="200" placeholder="e.g. Sprint 1" />
+            </div>
+            <div class="col-md-4">
+                <button type="submit" class="btn btn-primary w-100">Create Board</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@if (!Model.Boards.Any())
+{
+    <p class="text-muted">No boards yet. Create one above to start organizing tasks.</p>
+}
+else
+{
+    <div class="row g-3">
+        @foreach (var board in Model.Boards)
+        {
+            <div class="col-md-4">
+                <div class="card board-card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">
+                            <a asp-controller="Boards" asp-action="Details" asp-route-id="@board.Id">@board.Name</a>
+                        </h5>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}

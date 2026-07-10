@@ -1,0 +1,67 @@
+@model Tproject.Domain.Entities.Board
+@{
+    ViewData["Title"] = Model.Name;
+}
+
+<nav aria-label="breadcrumb" class="mb-3">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a asp-controller="Projects" asp-action="Index">Projects</a></li>
+        <li class="breadcrumb-item"><a asp-controller="Projects" asp-action="Details" asp-route-id="@Model.ProjectId">@Model.Project.Name</a></li>
+        <li class="breadcrumb-item active">@Model.Name</li>
+    </ol>
+</nav>
+
+<div class="board-header">
+    <h1>@Model.Name</h1>
+</div>
+
+<div class="board-toolbar mb-3">
+    <form asp-controller="Columns" asp-action="Create" method="post" class="d-flex gap-2">
+        @Html.AntiForgeryToken()
+        <input type="hidden" name="BoardId" value="@Model.Id" />
+        <input type="text" class="form-control form-control-sm" name="Name" placeholder="New column name" required maxlength="200" />
+        <button type="submit" class="btn btn-sm btn-outline-light">Add Column</button>
+    </form>
+</div>
+
+<div class="board-columns" id="board-columns">
+    @foreach (var column in Model.Columns)
+    {
+        <div class="board-column" data-column-id="@column.Id">
+            <div class="column-header">
+                <h3>@column.Name</h3>
+                <span class="task-count">@column.Tasks.Count</span>
+            </div>
+
+            <div class="task-list" data-column-id="@column.Id">
+                @foreach (var task in column.Tasks)
+                {
+                    <div class="task-card" data-task-id="@task.Id">
+                        <div class="task-title">@task.Title</div>
+                        @if (!string.IsNullOrWhiteSpace(task.Description))
+                        {
+                            <div class="task-description">@task.Description</div>
+                        }
+                    </div>
+                }
+            </div>
+
+            <form asp-controller="Tasks" asp-action="Create" method="post" class="add-task-form">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="BoardId" value="@Model.Id" />
+                <input type="hidden" name="ColumnId" value="@column.Id" />
+                <input type="text" class="form-control form-control-sm" name="Title" placeholder="Add a task..." required maxlength="300" />
+            </form>
+        </div>
+    }
+</div>
+
+@if (!Model.Columns.Any())
+{
+    <p class="text-muted mt-3">No columns yet. Add a column above to start adding tasks.</p>
+}
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
+    <script src="~/js/board.js" asp-append-version="true"></script>
+}
